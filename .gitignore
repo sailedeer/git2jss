@@ -1,0 +1,5 @@
+/.yardoc
+*.gem
+*.code-workspace
+/docs
+*.DS_Store
