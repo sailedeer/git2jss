@@ -5,7 +5,7 @@ require "./lib/#{lib_dir}/version"
 
 Gem::Specification.new do |s|
   # General
-  s.name        = proj_name
+  s.name = proj_name
   s.version     = Git2JSS::VERSION
   s.date        = Time.now.utc.strftime('%Y-%m-%d')
   s.summary     = "Git to JSS"
@@ -21,18 +21,19 @@ Gem::Specification.new do |s|
   # s.homepage    = 'https://rubygems.org/gems/git2jss' or https://github.com/UW-LT/git2jss
   # s.license     = what license should we use?
 
-  s.files       = Dir['lib/**/*.rb']
-  s.files       << '.yardopts'
-  s.files       += Dir['test/**/*']
+  s.files = Dir['lib/**/*.rb']
+  s.files << '.yardopts'
+  s.files += Dir['test/**/*']
 
   s.executables << 'git2jss'
 
   # Dependencies
-  s.required_ruby_version   = '>= 2.0.0'
+  s.required_ruby_version = '>= 2.0.0'
 
-  s.add_runtime_dependency  = 'ruby-jss'
+  s.add_runtime_dependency 'ruby-jss'
+  s.add_runtime_dependency 'keyring'
 
   # Rdoc
   s.extra_rdoc_files  = ['README.md', 'LICENSE.txt', 'CHANGES.md']
-  s.rdoc_options      << '--title' << 'Git2JSS' << '--line-numbers' << '--main' << 'README.md'
+  s.rdoc_options << '--title' << 'Git2JSS' << '--line-numbers' << '--main' << 'README.md'
 end
