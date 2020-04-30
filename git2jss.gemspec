@@ -32,6 +32,7 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency 'ruby-jss'
   s.add_runtime_dependency 'keyring'
+  s.add_runtime_dependency 'subprocess'
 
   # Rdoc
   s.extra_rdoc_files  = ['README.md', 'LICENSE.txt', 'CHANGES.md']
