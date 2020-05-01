@@ -1,11 +1,9 @@
+require 'git2jss/exceptions'
+
 require 'tmpdir'
 require 'subprocess'
 
 module Git2JSS
-
-  attr_reader :tag
-
-  attr_reader :branch
 
   attr_reader :source_dir
 
@@ -13,29 +11,42 @@ module Git2JSS
 
   attr_reader :remote_name
 
+  attr_reader :remote_url
+
   attr_reader :temp_dir
 
   class GitRepo
 
-    # empty hash to start
     def initialize(args)
-      # raise exception if we don't see the proper number of args
+      # raise exception if we don't see the proper number of args?
+      # or if args is not a hash, like we expect
       @tag ||= args[:tag]
       @branch ||= args[:branch]
-      @source_dir ||= args[:source_dir]
-
-      # raise exception if both tag and branch specified
-
+      @source_dir ||= args[:source_dir] or "."
       @ref ||= args[:tag] or args[:branch]
-      # raise exception if ref is still nil
 
-      # raise an exception if both tag and branch specified
+      if tag and branch
+        raise ParameterError, "Specify either tag or branch"
+      end
 
       # attempt to capture the name of the remote
-      
+      begin
+        @remote_name = get_remote_name
+      rescue Subprocess::NonZeroExit => e
+        raise NotAGitRepoError, "Not a git repo " if e.include? "not a git \
+                                                                repository"
+      rescue RuntimeError => e
+        # this is extremely bad and I need to check for each error explicitly
+        puts e
+      end
+
+      @temp_dir = Dir.tempdir
+      @remote_url = get_remote_url
+
       # attempt to clone the remote to a temporary file if ref is on remote
       # otherwise throw an exception
       
+      # return the path to the remote
     end
 
     private
@@ -44,13 +55,29 @@ module Git2JSS
       
     end
 
-    def get_remote_name(source = nil)
-      # raise an exception if remote is nil
+    def get_remote_name
+      # use the subprocess module to spin up a git process in @source_dir
+      remotes = Subprocess.check_output(%W[git remote], cwd=@source_dir).
+                  chomp.split("\n")
+
+      if remotes.size > 1
+        raise TooManyRemotesException, "Git2JSS only supports one remote."
+      elif remotes.size < 1 or remotes[0] is nil
+        raise NoRemoteError, "No Git remote is configured."
+      else
+        remotes[0]
+      end
     end
 
     def get_remote_url
+      # use the subprocess module to spin up a git process in @source_dir
+      remote_url = Subprocess.check_output(%W[git remote show #{@remote_name}],
+                                          cwd=@source_dir).chomp.split("\n")
+      raise 
+      
+      # we know the fetch URL is going to be the second line of output
+      # and then the URI itself is the 3rd word on the line
+      remote_url = remote_url[1].split(' ')[2]
     end
-
-    
   end
 end
