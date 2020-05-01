@@ -1,6 +1,5 @@
 require 'git2jss/prefs'
 require 'git2jss/repo'
-require ''
 
 require 'ruby-jss'
 
