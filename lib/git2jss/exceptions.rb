@@ -1,0 +1,2 @@
+class ParameterError < RuntimeError; end
+
