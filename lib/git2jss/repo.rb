@@ -27,15 +27,16 @@ module Git2JSS
       @ref ||= args[:tag] or args[:branch]
 
       if tag and branch
-        raise ParameterError, "Specify either tag or branch"
+        raise Git2JSS::ParameterError, "Specify either tag or branch"
       end
 
       # attempt to capture the name of the remote
       begin
         @remote_name = get_remote_name
       rescue Subprocess::NonZeroExit => e
-        raise NotAGitRepoError, "Not a git repo " if e.include? "not a git \
-                                                                repository"
+        if e.include? "not a git repository"
+          raise Git2JSS::NotAGitRepoError, "Not a git repo"
+        end
       rescue RuntimeError => e
         # this is extremely bad and I need to check for each error explicitly
         puts e
@@ -49,7 +50,7 @@ module Git2JSS
     end
 
     def file_in_repo?(name=nil)
-      unless name not nil raise ParameterError, "Filename can't be nil"
+      unless name not nil raise Git2JSS::ParameterError, "Filename can't be nil"
       name = File.join(@temp_dir, name)
       File.file? name
     end
@@ -71,9 +72,9 @@ module Git2JSS
                   chomp.split("\n")
 
       if remotes.size > 1
-        raise TooManyRemotesException, "Git2JSS only supports one remote."
+        raise Git2JSS::TooManyRemotesError, "Git2JSS only supports one remote."
       elif remotes.size < 1 or remotes[0] is nil
-        raise NoRemoteError, "No Git remote is configured."
+        raise Git2JSS::NoRemoteError, "No Git remote is configured."
       else
         remotes[0]
       end
