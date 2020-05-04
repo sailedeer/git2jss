@@ -2,6 +2,7 @@ require 'git2jss/exceptions'
 
 require 'tmpdir'
 require 'subprocess'
+require 'pathname'
 
 module Git2JSS
 
@@ -43,16 +44,25 @@ module Git2JSS
       @temp_dir = Dir.tempdir
       @remote_url = get_remote_url
 
-      # attempt to clone the remote to a temporary file if ref is on remote
-      # otherwise throw an exception
-      
-      # return the path to the remote
+      # attempt to clone the remote
+      @temp_dir = clone_to_temp_dir
+    end
+
+    def file_in_repo?(name=nil)
+      unless name not nil raise ParameterError, "Filename can't be nil"
+      name = File.join(@temp_dir, name)
+      File.file? name
     end
 
     private
 
+    # clone to temp and return path to repo in temp dir
     def clone_to_temp_dir
+      output = Subprocess.check_output(%W[git clone --branch #{@ref} #{@remote_url}],
+        cwd=@temp_dir).chomp.split("\n")
       
+      output = output[0].split(' ')[2].chomp("\'")
+      File.join(@temp_dir, output)
     end
 
     def get_remote_name
@@ -73,11 +83,11 @@ module Git2JSS
       # use the subprocess module to spin up a git process in @source_dir
       remote_url = Subprocess.check_output(%W[git remote show #{@remote_name}],
                                           cwd=@source_dir).chomp.split("\n")
-      raise 
       
       # we know the fetch URL is going to be the second line of output
       # and then the URI itself is the 3rd word on the line
+      # TODO: Use regex to find the line we want instead
       remote_url = remote_url[1].split(' ')[2]
-    end
+      end
   end
 end
