@@ -12,23 +12,17 @@ module Git2JSS
 
   attr_reader :remote_name
 
-  attr_reader :remote_url
+  attr_reader :remote_uri
 
-  attr_reader :temp_dir
+  attr_reader :temp_repo_dir
 
   class GitRepo
 
-    def initialize(args)
+    def initialize(args = {})
       # raise exception if we don't see the proper number of args?
       # or if args is not a hash, like we expect
-      @tag ||= args[:tag]
-      @branch ||= args[:branch]
+      @ref ||= args[:ref]
       @source_dir ||= args[:source_dir] or "."
-      @ref ||= args[:tag] or args[:branch]
-
-      if tag and branch
-        raise Git2JSS::ParameterError, "Specify either tag or branch"
-      end
 
       # attempt to capture the name of the remote
       begin
@@ -42,14 +36,15 @@ module Git2JSS
         puts e
       end
 
-      @temp_dir = Dir.tempdir
-      @remote_url = get_remote_url
+      @temp_repo_dir = Dir.tempdir
+      @remote_uri = get_remote_uri
 
       # attempt to clone the remote
-      @temp_dir = clone_to_temp_dir
+      @temp_repo_dir = clone_to_temp_dir
     end
 
-    def file_in_repo?(name=nil)
+    # does the file exist at the ref?
+    def file_exists?(name=nil)
       unless name not nil raise Git2JSS::ParameterError, "Filename can't be nil"
       name = File.join(@temp_dir, name)
       File.file? name
@@ -59,13 +54,14 @@ module Git2JSS
 
     # clone to temp and return path to repo in temp dir
     def clone_to_temp_dir
-      output = Subprocess.check_output(%W[git clone --branch #{@ref} #{@remote_url}],
-        cwd=@temp_dir).chomp.split("\n")
+      output = Subprocess.check_output(%W[git clone --branch #{@ref} \
+        #{@remote_url}], cwd=@temp_dir).chomp.split("\n")
       
       output = output[0].split(' ')[2].chomp("\'")
       File.join(@temp_dir, output)
     end
 
+    # retrieves the name of the remote (usually origin)
     def get_remote_name
       # use the subprocess module to spin up a git process in @source_dir
       remotes = Subprocess.check_output(%W[git remote], cwd=@source_dir).
@@ -80,7 +76,8 @@ module Git2JSS
       end
     end
 
-    def get_remote_url
+    # retrieves the URI of the remote
+    def get_remote_uri
       # use the subprocess module to spin up a git process in @source_dir
       remote_url = Subprocess.check_output(%W[git remote show #{@remote_name}],
                                           cwd=@source_dir).chomp.split("\n")
