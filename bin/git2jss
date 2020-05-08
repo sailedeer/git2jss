@@ -1,3 +1,34 @@
 #!/usr/bin/env ruby
+require 'git2jss' # => this is the gem itself
+require 'optparse'
 
-abort "you need to write me"
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: git2jss [options]"
+
+  opts.on("-fFILE", "--file=FILE", "File to upload to the JSS") do |f|
+    options[:file] = f
+  end
+
+  opts.on("")
+end.parse!
+
+
+# retrieve the command line arguments
+
+# parse them into a usable list
+
+# construct prefs object based on specified args
+
+# construct repo object based on specified args
+
+# for all files specified (some subset of all files in ref or all)
+
+  # check if the file exists
+
+  # attempt to put it on the jss
+
+  # get some information about the specified ref (commit or tag)
+
+  # update notes with that information (commit/tag message, commit/tag name/id)
+
