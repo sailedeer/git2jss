@@ -11,9 +11,10 @@ module Git2JSS
 
     attr_reader :fqdn
 
+    # initialize a new Prefs object
     def initialize(args = {})
-      @file = args[:file] or false
-      if @file
+      @file = args[:file]
+      if not @file.nil?
         @fqdn = JSS::CONFIG.api_server_name
         @verify_cert = JSS::CONFIG.api_verify_cert
         @port = JSS::CONFIG.api_server_port
@@ -26,13 +27,7 @@ module Git2JSS
       end
       unless @fqdn raise ParameterError, "Please specify an FQDN for the JSS"
       unless @user raise ParameterError, "Please specify an API user"
-      @keyring = args[:keyring] or false
-      if @keyring
-        @keyring = Keyring.new
-        @pw = @keyring.get_password "#{@fqdn}", "#{@user}"
-      else
-        @pw = args[:pw]
-      end
+      @pw = load_pass args
     end
 
     # save JSS prefs to prefs file/keyring if specified
@@ -47,6 +42,17 @@ module Git2JSS
         if not password
           keyring.set_password "#{@fqdn}", "#{@user}", "#{@pw}"
         end
+      end
+    end
+
+    private 
+
+    def load_pass(args = {})
+      if args[:keyring]
+        keyring = Keyring.new
+        keyring.get_password "#{@fqdn}", "#{@user}"
+      else
+        args[:pw]
       end
     end
   end
