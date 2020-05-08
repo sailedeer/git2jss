@@ -1,8 +1,5 @@
-require 'git2jss/exceptions'
-
 require 'tmpdir'
 require 'subprocess'
-require 'pathname'
 
 module Git2JSS
 
@@ -21,8 +18,8 @@ module Git2JSS
     def initialize(args = {})
       # raise exception if we don't see the proper number of args?
       # or if args is not a hash, like we expect
-      @ref ||= args[:ref]
-      @source_dir ||= args[:source_dir] or "."
+      @ref = args[:ref]
+      @source_dir = args[:source_dir] or "."
 
       # attempt to capture the name of the remote
       begin
@@ -30,6 +27,8 @@ module Git2JSS
       rescue Subprocess::NonZeroExit => e
         if e.include? "not a git repository"
           raise Git2JSS::NotAGitRepoError, "Not a git repo"
+        else
+          raise RuntimeError, "Unknown error"
         end
       rescue RuntimeError => e
         # this is extremely bad and I need to check for each error explicitly
@@ -48,6 +47,13 @@ module Git2JSS
       unless name not nil raise Git2JSS::ParameterError, "Filename can't be nil"
       name = File.join(@temp_dir, name)
       File.file? name
+    end
+
+    # retrieve a file object which corresponds to the specified file
+    def get_file(name=nil)
+      unless name not nil raise Git2JSS::ParameterError, "Filename can't be nil"
+      name = File.join(@temp_dir, name)
+      File.new name
     end
 
     private
@@ -82,7 +88,7 @@ module Git2JSS
       remote_url = Subprocess.check_output(%W[git remote show #{@remote_name}],
                                           cwd=@source_dir).chomp.split("\n")
       
-      # we know the fetch URL is going to be the second line of output
+      # we know the fetch URI is going to be the second line of output
       # and then the URI itself is the 3rd word on the line
       # TODO: Use regex to find the line we want instead
       remote_url = remote_url[1].split(' ')[2]
