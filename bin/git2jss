@@ -1,22 +1,65 @@
 #!/usr/bin/env ruby
-require 'git2jss' # => this is the gem itself
+#require 'git2jss' # => this is the gem itself
 require 'optparse'
+
+n_args = ARGV.length
 
 options = {}
 OptionParser.new do |opts|
   opts.banner = "Usage: git2jss [options]"
 
-  opts.on("-fFILE", "--file=FILE", "File to upload to the JSS") do |f|
+  opts.on("-h", "--help", "Display this screen") do 
+    puts opts
+    exit
+  end
+
+  options[:file] = nil
+  opts.on("-f", "--file FILE", "File to upload to the JSS") do |f|
     options[:file] = f
   end
 
-  opts.on("")
+  options[:branch] = nil
+  opts.on("-b",
+          "--branch BRANCH",
+          "Branch to look for the file in") do |b|
+    options[:branch] = b
+  end
+
+  options[:tag] = nil
+  opts.on("-t",
+    "--tag TAG",
+    "Tag to look for the file at") do |t|
+    options[:tag] = t
+  end
+
+  options[:name] = nil
+  opts.on("-n",
+          "--name NAME",
+          "Name of the Script object in the JSS") do |n|
+    options[:name] = n
+  end
+
+  options[:all] = false
+  opts.on("-a",
+          "--all",
+          "Grab all files in the ref?") do
+    options[:all] = true
+  end
+
+  options[:verbose] = false
+  opts.on("-v",
+          "--verbose",
+          "Be verbose with our output") do
+    options[:verbose] = true
+  end
+
+  options[:info] = false
+  opts.on("-i",
+          "--jss-info",
+          "Print configure JSS options") do
+    options[:info] = true
+  end
 end.parse!
-
-
-# retrieve the command line arguments
-
-# parse them into a usable list
 
 # construct prefs object based on specified args
 
@@ -31,4 +74,3 @@ end.parse!
   # get some information about the specified ref (commit or tag)
 
   # update notes with that information (commit/tag message, commit/tag name/id)
-
