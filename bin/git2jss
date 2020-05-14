@@ -2,14 +2,40 @@
 #require 'git2jss' # => this is the gem itself
 require 'optparse'
 
-n_args = ARGV.length
+cli_options = Struct.new(:name)
 
+class CLIParser
+  attr_reader :files, :all, :names, :source_dir, :ref, :info, :verbose
+
+  def initialize
+    self.files = []
+    self.all = false
+    self.names = []
+    self.source_dir = nil
+    self.ref = nil
+    self.info = nil
+    self.verbose = false
+  end
+
+  def define_options(parser)
+    parser.banner = "Usage: git2jss [options]"
+    parser.separator ""
+    parser.separator "Specific options:"
+
+    files_option(parser)
+    all_option(parser)
+    names_option(parser)
+    source_dir_option(parser)
+    branch_option
+end
+
+# collect command line arguments
 options = {}
-OptionParser.new do |opts|
+option_parser = OptionParser.new do |opts|
   opts.banner = "Usage: git2jss [options]"
 
   opts.on("-h", "--help", "Display this screen") do 
-    puts opts
+    
     exit
   end
 
@@ -59,7 +85,11 @@ OptionParser.new do |opts|
           "Print configure JSS options") do
     options[:info] = true
   end
-end.parse!
+end
+
+option_parser.parse
+
+puts ARGV.length
 
 # construct prefs object based on specified args
 
