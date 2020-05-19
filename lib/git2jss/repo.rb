@@ -15,11 +15,9 @@ module Git2JSS
 
   class GitRepo
 
-    def initialize(args = {})
-      # raise exception if we don't see the proper number of args?
-      # or if args is not a hash, like we expect
-      @ref = args[:ref]
-      @source_dir = args[:source_dir] or "."
+    def initialize(ref, source_dir=".")
+      @ref = ref
+      @source_dir = source_dir
 
       # attempt to capture the name of the remote
       begin
@@ -43,17 +41,15 @@ module Git2JSS
     end
 
     # does the file exist at the ref?
-    def file_exists?(name=nil)
-      unless name not nil raise Git2JSS::ParameterError, "Filename can't be nil"
+    def has_file?(name)
       name = File.join(@temp_dir, name)
-      File.file? name
+      File.exist? name
     end
 
-    # retrieve a file object which corresponds to the specified file
-    def get_file(name=nil)
-      unless name not nil raise Git2JSS::ParameterError, "Filename can't be nil"
+    # retrieve a File object which corresponds to the specified file
+    def get_file(name)
       name = File.join(@temp_dir, name)
-      File.new name
+      File.new name, "r"
     end
 
     private
