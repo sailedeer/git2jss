@@ -15,9 +15,10 @@ module Git2JSS
 
   class GitRepo
 
-    def initialize(ref, source_dir=".")
+    def initialize(ref, source_dir)
       @ref = ref
-      @source_dir = source_dir
+      raise ArgumentError, "Source dir invalid" unless Dir.exist? source_dir
+      @source_dir = File.expand_path(source_dir)
 
       # attempt to capture the name of the remote
       begin
