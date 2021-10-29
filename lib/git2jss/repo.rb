@@ -72,7 +72,7 @@ module Git2JSS
 
       if remotes.size > 1
         raise Git2JSS::TooManyRemotesError, "Git2JSS only supports one remote."
-      elif remotes.size < 1 or remotes[0] is nil
+      elsif remotes.size < 1 or remotes[0] == nil
         raise Git2JSS::NoRemoteError, "No Git remote is configured."
       else
         remotes[0]
@@ -89,6 +89,6 @@ module Git2JSS
       # and then the URI itself is the 3rd word on the line
       # TODO: Use regex to find the line we want instead
       remote_url = remote_url[1].split(' ')[2]
-      end
+    end
   end
 end

@@ -26,13 +26,13 @@ module Git2JSS
 
       # this raises a few errors, will need to check for each one
       begin
-        repo = Git2JSS::GitRepo ref, options.source_dir
+        repo = Git2JSS::GitRepo.new ref, options.source_dir
       rescue ArgumentError => ae
         puts ae.message
         puts ae.backtrace.inspect
       rescue Git2JSS::Error => e
-        puts re.message
-        puts re.backtrace.inspect
+        puts e.message
+        puts e.backtrace.inspect
       ensure
         puts "Unable to build GitRepo object"
         exit(1)
@@ -61,12 +61,16 @@ module Git2JSS
     private
 
     def self.get_args(args)
-      parser = Git2JSS::Parser.new
+      parser = Parser.new
       parser.parse!
       parser
     end
 
     def self.good_args?(options)
+      if not options.tag and not options.branch
+        puts "No ref specified."
+        return false
+      end
       if options.tag and options.branch
         puts "Specify either --tag or --branch, but not both."
         return false
@@ -79,7 +83,7 @@ module Git2JSS
         puts "Specify either --all or --files, but not both."
         return false
       end
-      true
+      return true
     end
   end   # class Git2JSS
 end   # module Git2JSS

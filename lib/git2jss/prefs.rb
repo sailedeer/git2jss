@@ -25,8 +25,8 @@ module Git2JSS
         @port = args[:port] or DEFAULT_PORT
         @user = args[:user]
       end
-      unless @fqdn raise ParameterError, "Please specify an FQDN for the JSS"
-      unless @user raise ParameterError, "Please specify an API user"
+      unless @fqdn then raise ParameterError "Please specify an FQDN for the JSS" end
+      unless @user then raise ParameterError "Please specify an API user" end
       @pw = load_pass args
     end
 
@@ -50,9 +50,9 @@ module Git2JSS
     def load_pass(args = {})
       if args[:keyring]
         keyring = Keyring.new
-        keyring.get_password "#{@fqdn}", "#{@user}"
+        return keyring.get_password "#{@fqdn}", "#{@user}"
       else
-        args[:pw]
+        return args[:pw]
       end
     end
   end
