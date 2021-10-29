@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   # s.license     = what license should we use?
 
   s.files = Dir['lib/**/*.rb']
-  s.files << '.yardopts'
+  # s.files << '.yardopts'
   s.files += Dir['test/**/*']
 
   s.executables << 'git2jss'
@@ -35,6 +35,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'subprocess'
 
   # Rdoc
-  s.extra_rdoc_files  = ['README.md', 'LICENSE.txt', 'CHANGES.md']
+  s.extra_rdoc_files  = ['README.md', 'CHANGES.md']
+  # s.extra_rdoc_files  = ['README.md', 'LICENSE.txt', 'CHANGES.md']
   s.rdoc_options << '--title' << 'Git2JSS' << '--line-numbers' << '--main' << 'README.md'
 end
