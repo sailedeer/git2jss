@@ -1,4 +1,6 @@
+require 'ruby-jss'
 require 'keyring'
+require 'git2jss/exceptions'
 
 module Git2JSS
   class KeyringJSSPrefs
@@ -25,8 +27,8 @@ module Git2JSS
         @port = args[:port] or DEFAULT_PORT
         @user = args[:user]
       end
-      unless @fqdn then raise ParameterError "Please specify an FQDN for the JSS" end
-      unless @user then raise ParameterError "Please specify an API user" end
+      unless @fqdn then raise ParameterError, "FQDN is empty. Exiting..." end
+      unless @user then raise ParameterError, "API username is empty. Exiting..." end
       @pw = load_pass args
     end
 
