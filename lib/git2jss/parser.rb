@@ -4,7 +4,7 @@ require 'git2jss/version'
 module Git2JSS
   class Parser
     attr_reader :files, :all, :names, :source_dir, :branch, :tag, :prefs,
-                :verbose, :dry, :info
+                :verbose, :dry, :info, :info_flag
   
     def initialize
       @files = []
@@ -14,16 +14,25 @@ module Git2JSS
       @branch = nil
       @tag = nil
       @prefs = nil
-      @info = []
+      @info = nil
+      @info_flag = false
       @verbose = false
       @dry = false
+      @options = OptionParser.new do |opts|
+        define_options opts
+      end
     end
 
     def parse!
-      options = OptionParser.new do |opts|
-        define_options opts
-      end
-      options.parse!
+      return @options.parse!
+    end
+
+    def parse
+      return @options.parse
+    end
+
+    def help
+      return @options.help
     end
   
     private 
@@ -53,7 +62,7 @@ module Git2JSS
       end
   
       parser.on_tail "--version", "Show version" do
-        puts Git2JSS::VERSION
+        puts VERSION
         exit
       end
     end
@@ -95,20 +104,22 @@ module Git2JSS
     end
   
     def info_option(parser)
-      parser.on "-i", "--info [PREF FILE]", "Print JSS configuration" do
-        
+      parser.on "-i", "--info [PREF FILE]", "Print JSS configuration" do |i|
+        @info = i
+        # capture a flag in case the user doesn't specify a file
+        @info_flag = true
       end
     end
   
     def verbose_option(parser)
-      parser.on "-v", "--version", "Run verbosely" do
-        self.verbose = true
+      parser.on "-v", "--verbose", "Run verbosely" do
+        @verbose = true
       end
     end
 
     def dry_run_option(parser)
       parser.on "-d", "--dry-run", "Do everything but make changes to the JSS" do
-        self.dry = true
+        @dry = true
       end
     end
   end   # class CLIParser
