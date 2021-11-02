@@ -5,6 +5,8 @@ require 'ruby-jss'
 require 'git2jss/prefs'
 require 'git2jss/repo'
 require 'git2jss/parser'
+require 'git2jss/exceptions'
+require 'git2jss/version'
 
 module Git2JSS
   class Git2JSS
@@ -47,6 +49,10 @@ module Git2JSS
         end
       end
 
+      # connect to the JSS
+      if options.info_flag
+        
+
       if options.dry
         # don't make any changes to the JSS, but do everything else and
         # dump it out to stdout
@@ -55,6 +61,13 @@ module Git2JSS
         end
       else
         # do the actual thing
+        # steps:
+        #   1.  iterate over push_map, extracting name and file in repo
+        #   2.  check to see if a Script object with that name exists on the JSS
+        #   2.1 if it does, let's pull it down and update it
+        #   2.2 if not, make a new one
+        #   3.  send Script object to JSS
+        puts "Real push"
       end
     end
 
@@ -67,23 +80,28 @@ module Git2JSS
     end
 
     def self.good_args?(options)
-      if not options.tag and not options.branch
-        puts "No ref specified."
+      if options.tag and not options.branch
+        puts "tag specified"
+        return true
+      elsif options.branch and not options.tag
+        puts "branch specified"
+        return true
+      elsif not options.branch and not options.tag and options.info_flag
+        # attempt to initialize a prefs object with the info
+        begin
+          args = {:file => options.info}
+          prefs = KeyringJSSPrefs.new args
+          puts "FQDN: #{prefs.fqdn}"
+          puts "USER: #{prefs.user}"
+        rescue ParameterError => pe
+          puts pe.message
+        ensure
+          return false
+        end
+      else
+        puts options.help
         return false
       end
-      if options.tag and options.branch
-        puts "Specify either --tag or --branch, but not both."
-        return false
-      end
-      if options.files.length != options.names.length
-        puts "The number of files does not equal the number of names."
-        return false
-      end
-      if options.all and options.files 
-        puts "Specify either --all or --files, but not both."
-        return false
-      end
-      return true
     end
   end   # class Git2JSS
 end   # module Git2JSS
