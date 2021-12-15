@@ -31,8 +31,9 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.0.0'
 
   s.add_runtime_dependency 'ruby-jss'
-  s.add_runtime_dependency 'keyring'
+  s.add_runtime_dependency 'ruby-keychain'
   s.add_runtime_dependency 'subprocess'
+  s.add_runtime_dependency 'git'
 
   # Rdoc
   s.extra_rdoc_files  = ['README.md', 'CHANGES.md']

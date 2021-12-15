@@ -1,5 +1,5 @@
 require 'ruby-jss'
-require 'keyring'
+require 'keychain'
 require 'git2jss/exceptions'
 
 module Git2JSS
@@ -12,6 +12,8 @@ module Git2JSS
     attr_reader :user
 
     attr_reader :fqdn
+
+    attr_reader :port
 
     # initialize a new Prefs object
     def initialize(args = {})
@@ -40,19 +42,34 @@ module Git2JSS
       JSS::CONFIG.api_username = @user
       JSS::CONFIG.save
       if @keyring
-        password = keyring.get_password "#{@fqdn}", "#{@user}"
-        if not password
-          keyring.set_password "#{@fqdn}", "#{@user}", "#{@pw}"
+        item = @keyring.internet_passwords.where(server: "#{@fqdn}", account: "#{@user}")
+        if item.nil?
+          @keyring.internet_passwords.create(server: "#{@fqdn}", account: "#{@user}", protocol: Keychain::Protocols::HTTPS, password: "#{@pw}")
+        else
+          item.password = "#{@pw}"
+          item.save!
         end
       end
+      puts "JSS Credentials have been updated."
     end
 
     private 
 
     def load_pass(args = {})
       if args[:keyring]
-        keyring = Keyring.new
-        return keyring.get_password "#{@fqdn}", "#{@user}"
+        @keyring = Keychain.default
+        item = @keyring.internet_passwords.where(server: "#{@fqdn}", account: "#{@user}")
+        item = item.first
+        if item.nil?
+          # prompt the user for a password
+          print("Please enter the API user password for #{@fqdn}: ")
+          pass = gets
+          pass = pass.strip
+          #TODO: add some way to confirm the password, for now just assume they did it right
+          @keyring.internet_passwords.create(server: "#{@fqdn}", account: "#{@user}", protocol: Keychain::Protocols::HTTPS, password: "#{pass}")
+          return pass
+        end
+        return item.password
       else
         return args[:pw]
       end

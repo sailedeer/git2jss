@@ -22,20 +22,22 @@ module Git2JSS
 
       # get to work
       ref = (options.tag or options.branch)
+      puts ref
       name_sym_list = options.names.map {|n| n.to_sym}
       push_map = {}
       repo = nil
 
       # this raises a few errors, will need to check for each one
       begin
-        repo = Git2JSS::GitRepo.new ref, options.source_dir
+        repo = GitRepo.new ref, options.source_dir
       rescue ArgumentError => ae
         puts ae.message
         puts ae.backtrace.inspect
-      rescue Git2JSS::Error => e
+        puts "Unable to build GitRepo object"
+        exit(1)
+      rescue Error => e
         puts e.message
         puts e.backtrace.inspect
-      ensure
         puts "Unable to build GitRepo object"
         exit(1)
       end
@@ -49,10 +51,6 @@ module Git2JSS
         end
       end
 
-      # connect to the JSS
-      if options.info_flag
-        
-
       if options.dry
         # don't make any changes to the JSS, but do everything else and
         # dump it out to stdout
@@ -60,14 +58,24 @@ module Git2JSS
           puts "Fake push of #{v} with name #{k.to_s} to JSS"
         end
       else
+        prefs = KeyringJSSPrefs.new(keyring: true, file: true)
+        # 0. connect to the JSS
+        begin
+          JSS.api.connect(user: "#{prefs.user}", pw: "#{prefs.pw}", server: "#{prefs.fqdn}")
+        rescue JSS::AuthenticationError => ae
+          puts "Failed to authenticate against the JSS. Check that your password is correct."
+        end
+        scripts_in_jss = JSS::Script.all_names
+        puts scripts_in_jss 
+        push_map.each do |k, v|
+          # steps:
+          #   1.  iterate over push_map, extracting name and file in repo
+          #   2.  check to see if a Script object with that name exists on the JSS
+          #   2.1 if it does, let's pull it down and update it
+          #   2.2 if not, make a new one
+          #   3.  send Script object to JSS
+        end
         # do the actual thing
-        # steps:
-        #   1.  iterate over push_map, extracting name and file in repo
-        #   2.  check to see if a Script object with that name exists on the JSS
-        #   2.1 if it does, let's pull it down and update it
-        #   2.2 if not, make a new one
-        #   3.  send Script object to JSS
-        puts "Real push"
       end
     end
 
@@ -81,10 +89,8 @@ module Git2JSS
 
     def self.good_args?(options)
       if options.tag and not options.branch
-        puts "tag specified"
         return true
       elsif options.branch and not options.tag
-        puts "branch specified"
         return true
       elsif not options.branch and not options.tag and options.info_flag
         # attempt to initialize a prefs object with the info

@@ -10,7 +10,7 @@ module Git2JSS
       @files = []
       @all = false
       @names = []
-      @source_dir = "."
+      @source_dir = "./"
       @branch = nil
       @tag = nil
       @prefs = nil
