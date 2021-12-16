@@ -22,7 +22,6 @@ module Git2JSS
 
       # get to work
       ref = (options.tag or options.branch)
-      puts ref
       name_sym_list = options.names.map {|n| n.to_sym}
       push_map = {}
       repo = nil
@@ -51,31 +50,45 @@ module Git2JSS
         end
       end
 
-      if options.dry
-        # don't make any changes to the JSS, but do everything else and
-        # dump it out to stdout
-        push_map.each do |k, v|
-          puts "Fake push of #{v} with name #{k.to_s} to JSS"
+      prefs = KeyringJSSPrefs.new(keyring: true, file: true)
+      # 0. connect to the JSS
+      begin
+        JSS.api.connect(user: "#{prefs.user}", pw: "#{prefs.pw}", server: "#{prefs.fqdn}")
+      rescue JSS::AuthenticationError => ae
+        puts "Failed to authenticate against the JSS. Check that your password is correct."
+      end
+      script_names_in_jss = JSS::Script.all_names
+      push_map.each do |k, v|
+        code = File.read(File.join(options.source_dir, v))
+        script = nil
+        script_names_in_jss.map(&:downcase)
+        if script_names_in_jss.include?(k.to_s.downcase) or 
+          # script objects exists in JSS already - let's update
+          script = JSS::Script.fetch(name: k.to_s)
+          t = Time.new
+          # TODO: add the commit that corresponds with this file - how to get this?
+          if not script.notes
+            script.notes = ""
+          end
+          if script.notes[-1] != "\n"
+            script.notes += "\n"
+          end
+          script.notes += "Script updated on #{t.inspect} from ref #{ref}\n"
+        else
+          # script object doesn't exist in JSS already - let's create
+          script = JSS::Script.make(name: k.to_s)
+          t = Time.new
+          script.notes = "Script object created on #{t.inspect} from ref #{ref}\n"
         end
-      else
-        prefs = KeyringJSSPrefs.new(keyring: true, file: true)
-        # 0. connect to the JSS
-        begin
-          JSS.api.connect(user: "#{prefs.user}", pw: "#{prefs.pw}", server: "#{prefs.fqdn}")
-        rescue JSS::AuthenticationError => ae
-          puts "Failed to authenticate against the JSS. Check that your password is correct."
+        script.code = code
+        if options.dry
+          # print the results, but don't save them to the JSS
+          puts script.name
+          puts script.code
+          puts script.info
+        else
+          script.save
         end
-        scripts_in_jss = JSS::Script.all_names
-        puts scripts_in_jss 
-        push_map.each do |k, v|
-          # steps:
-          #   1.  iterate over push_map, extracting name and file in repo
-          #   2.  check to see if a Script object with that name exists on the JSS
-          #   2.1 if it does, let's pull it down and update it
-          #   2.2 if not, make a new one
-          #   3.  send Script object to JSS
-        end
-        # do the actual thing
       end
     end
 

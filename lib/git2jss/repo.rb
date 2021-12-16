@@ -37,7 +37,7 @@ module Git2JSS
         puts e
       end
 
-      @temp_repo_dir = Dir.tmpdir
+      @temp_repo_dir = Dir.mktmpdir
       @remote_uri = get_remote_uri
 
       # attempt to clone the remote
@@ -61,20 +61,16 @@ module Git2JSS
     # clone to temp and return path to repo in temp dir
     def clone_to_temp_dir
       begin
-        temp_repo = Git.clone("#{@remote_uri}", "#{@temp_repo_dir}/basecamp")
-      rescue Git::GitExecuteError => gee
-        FileUtils.remove_dir("#{@temp_repo_dir}/basecamp", force: true)
-      ensure
-        temp_repo = Git.clone("#{@remote_uri}", "#{@temp_repo_dir}/basecamp")
+        temp_repo = Git.clone("#{@remote_uri}", "#{@temp_repo_dir}")
+      rescue Git::GitExecuteError
+        FileUtils.remove_dir("#{@temp_repo_dir}", force: true)
+        temp_repo = Git.clone("#{@remote_uri}", "#{@temp_repo_dir}")     
       end
       return temp_repo.dir.to_s
     end
 
     # retrieves the name of the remote (usually origin)
     def get_remote_name
-      # use the subprocess module to spin up a git process in @source_dir
-      # remotes = Subprocess.check_output(%W[git remote], cwd=@source_dir).
-      #             chomp.split("\n")
       remotes = @git.remotes
 
       if remotes.size > 1
@@ -88,13 +84,7 @@ module Git2JSS
 
     # retrieves the URI of the remote
     def get_remote_uri
-      # use the subprocess module to spin up a git process in @source_dir
-      # remote_url = Subprocess.check_output(%W[git remote show #{@remote_name}],
-      #                                     cwd=@source_dir).chomp.split("\n")
       remotes = @git.remotes
-      
-      # we know the fetch URI is going to be the second line of output
-      # and then the URI itself is the 3rd word on the line
       return remotes[0].url
     end
   end
