@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.authors     = ["Eli Reed"]
   s.email       = ["erobreed@uw.edu"]
   # s.homepage    = 'https://rubygems.org/gems/git2jss' or https://github.com/UW-LT/git2jss
-  # s.license     = what license should we use?
+  s.license     = 'MIT'
 
   s.files = Dir['lib/**/*.rb']
   # s.files << '.yardopts'
@@ -28,15 +28,14 @@ Gem::Specification.new do |s|
   s.executables << 'git2jss'
 
   # Dependencies
-  s.required_ruby_version = '>= 2.0.0'
+  s.required_ruby_version = '<= 2.7.5'
 
-  s.add_runtime_dependency 'ruby-jss'
+  s.add_runtime_dependency 'ruby-jss', '~>1.6', '>= 1.6.4'
   s.add_runtime_dependency 'ruby-keychain'
-  s.add_runtime_dependency 'subprocess'
   s.add_runtime_dependency 'git'
 
   # Rdoc
-  s.extra_rdoc_files  = ['README.md', 'CHANGES.md']
-  # s.extra_rdoc_files  = ['README.md', 'LICENSE.txt', 'CHANGES.md']
+  # s.extra_rdoc_files  = ['README.md', 'CHANGES.md']
+  s.extra_rdoc_files  = ['README.md', 'LICENSE.md', 'CHANGES.md']
   s.rdoc_options << '--title' << 'Git2JSS' << '--line-numbers' << '--main' << 'README.md'
 end
