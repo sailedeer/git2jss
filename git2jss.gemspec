@@ -28,14 +28,13 @@ Gem::Specification.new do |s|
   s.executables << 'git2jss'
 
   # Dependencies
-  s.required_ruby_version = '<= 2.7.5'
+  s.required_ruby_version = '>= 2.7.5'
 
-  s.add_runtime_dependency 'ruby-jss', '~>1.6', '>= 1.6.4'
-  s.add_runtime_dependency 'ruby-keychain'
-  s.add_runtime_dependency 'git'
+  s.add_runtime_dependency 'ruby-jss', '~>1.6.4'
+  s.add_runtime_dependency 'ruby-keychain', '~> 0.3.2'
+  s.add_runtime_dependency 'git', '~>1.10.0'
 
   # Rdoc
-  # s.extra_rdoc_files  = ['README.md', 'CHANGES.md']
   s.extra_rdoc_files  = ['README.md', 'LICENSE.md', 'CHANGES.md']
   s.rdoc_options << '--title' << 'Git2JSS' << '--line-numbers' << '--main' << 'README.md'
-end
+end # do block
