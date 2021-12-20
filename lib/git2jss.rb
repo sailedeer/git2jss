@@ -29,15 +29,13 @@ module Git2JSS
       # this raises a few errors, will need to check for each one
       begin
         repo = GitRepo.new ref, options.source_dir
-      rescue ArgumentError => ae
-        puts ae.message
-        puts ae.backtrace.inspect
-        puts "Unable to build GitRepo object"
+      rescue ArgumentError
+        puts "Unable to build GitRepo object."\
+              "Please ensure that the source directory is actually a git repository."
         exit(1)
       rescue Error => e
-        puts e.message
-        puts e.backtrace.inspect
-        puts "Unable to build GitRepo object"
+        puts "Unable to build GitRepo object."\
+        "Please ensure that the source directory is actually a git repository."
         exit(1)
       end
 
@@ -54,8 +52,9 @@ module Git2JSS
       # 0. connect to the JSS
       begin
         JSS.api.connect(user: "#{prefs.user}", pw: "#{prefs.pw}", server: "#{prefs.fqdn}")
-      rescue JSS::AuthenticationError => ae
+      rescue JSS::AuthenticationError
         puts "Failed to authenticate against the JSS. Check that your password is correct."
+        # TODO: prompt for a password and update the keychain
       end
       script_names_in_jss = JSS::Script.all_names
       push_map.each do |k, v|
