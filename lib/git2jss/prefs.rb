@@ -45,7 +45,7 @@ module Git2JSS
         prompt_for_preferences!
         puts("Would you like to save the ")
       end # if
-      @pw = load_pass(use_keyring)
+      @pw = load_password(use_keyring)
     end # initialize
 
     # save JSS prefs to prefs file and keyring if specified

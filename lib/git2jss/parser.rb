@@ -4,7 +4,7 @@ require 'git2jss/version'
 module Git2JSS
   class Parser
     attr_reader :files, :all, :names, :source_dir, :branch, :tag,
-                :verbose, :dry, :info, :use_keyring
+                :verbose, :dry, :info, :use_keyring, :preference_file
   
     def initialize
       @files = nil

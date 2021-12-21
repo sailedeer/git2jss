@@ -1,7 +1,7 @@
 # load the dependencies
 require 'ruby-jss'
 
-# load the rest of the module
+# load the rest of our module
 require 'git2jss/prefs'
 require 'git2jss/repo'
 require 'git2jss/parser'
@@ -33,7 +33,7 @@ module Git2JSS
       rescue Error
         puts("Unable to build GitRepo object. "\
               "Please ensure that the source directory "\
-              "is actually a git repository."
+              "is actually a git repository.")
         exit(1)
       end # begin
 
@@ -51,11 +51,11 @@ module Git2JSS
         end # if
       end # each loop
 
-      prefs = KeyringJSSPrefs.new(keyring: options.use_keyring, file: options.file)
+      prefs = KeyringJSSPrefs.new(options.preference_file, options.use_keyring)
       begin
         JSS.api.connect(user: "#{prefs.user}", pw: "#{prefs.pw}", server: "#{prefs.fqdn}")
       rescue JSS::AuthenticationError
-        puts("Failed to authenticate against the JSS. Check that your password is correct.")
+        puts("FATAL: Failed to authenticate against the JSS. Check that your password is correct.")
         exit(1)
       end # begin
 
@@ -84,9 +84,8 @@ module Git2JSS
         script.code = code
         if options.dry
           # print the results, but don't save them to the JSS
-          puts script.name
-          puts script.code
-          puts script.info
+          puts("Created/updated script with name: #{script.name}")
+          puts("Created/updated script notes field: #{script.notes}")
         else
           script.save
         end # if
@@ -107,20 +106,16 @@ module Git2JSS
         @ignore_names = true
       end # if
 
-      if not options.names
-        puts("WARNING: --names was not specified. Ignoring.")
-        @ignore_names = true
-      end # if
-
       if not options.info and (not (options.branch or options.tag))
-        puts("WARNING: No ref was given! Please specify either --tag or --branch.")
+        puts("FATAL: No ref was given! Please specify either --tag or --branch.")
         return false
       end # if
 
       if options.tag and options.branch
-        puts("Please specify either --tag or --branch (but not both).")
+        puts("FATAL: Please specify either --tag or --branch (but not both).")
         return false
       end # if
+      return true
     end # self.good_args?
   end # class Git2JSS
 end # module Git2JSS
