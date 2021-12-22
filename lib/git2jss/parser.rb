@@ -1,11 +1,19 @@
 require 'optparse'
+require 'ruby-jss'
 require 'git2jss/version'
 
 module Git2JSS
+
+  ### Parses command-line arguments and presents them via
+  ### convenient accessor methods.
   class Parser
     attr_reader :files, :all, :names, :source_dir, :branch, :tag,
                 :verbose, :dry, :info, :use_keyring, :preference_file
   
+    ### Initialize!
+    ###
+    ### @return [void]
+
     def initialize
       @files = nil
       @all = false
@@ -24,20 +32,44 @@ module Git2JSS
       end # block
     end # initialize
 
-    def parse!
-      return @options.parse!
+    ### Parse contents of args, destructively removing
+    ### switches.
+    ###
+    ### @param args[Array]
+    ###
+    ### @return [OptionParser]
+
+    def parse!(args)
+      return @options.parse!(args)
     end # parse!
 
-    def parse
-      return @options.parse
+    ### Parse contents of args, destructively removing
+    ### switches.
+    ###
+    ### @param args[Array]
+    ###
+    ### @return [OptionParser]
+
+    def parse(args)
+      return @options.parse(args)
     end # parse
 
+    ### Return the help message
+    ###
+    ### @return [String]
     def help
       return @options.help
     end # help
   
     private 
 
+    ### Define options for our program. Will exit early
+    ### depending on options passed by the user.
+    ###
+    ### @param parser[OptionParser]
+    ###
+    ### @return [void]
+    
     def define_options(parser)
       parser.banner = "Usage: git2jss [options]"
       parser.separator ""
@@ -124,7 +156,8 @@ module Git2JSS
       parser.on "-i", "--jss-info", "Print the current JSS configuration, "\
                                       "or enter a new configuration if no "\
                                       "configuration currently exists." do
-        @info = true
+        JSS::CONFIG.print
+        exit(0)
       end # do block
     end # info_option
 

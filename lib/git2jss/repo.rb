@@ -14,8 +14,10 @@ module Git2JSS
 
   attr_reader :temp_repo_dir
 
+  ### Abstracts a Git repository on the local filesystem.
   class GitRepo
 
+    ### Initialize!
     def initialize(ref, source_dir)
       @ref = ref
       @source_dir = File.expand_path(source_dir)
@@ -37,13 +39,22 @@ module Git2JSS
       @temp_repo_dir = clone_to_temp_dir
     end # initialize
 
-    # does the file exist at the ref?
+    ### Check if the file exists at the ref
+    ###
+    ### @param name[String]
+    ###
+    ### @return [Boolean]
+
     def has_file?(name)
       name = File.join(@temp_repo_dir, name)
       File.exist? name
     end # has_file?
 
-    # retrieve a File object which corresponds to the specified file
+    ### Retrieve a File object which corresponds to the specified file
+    ###
+    ### @param name[String]
+    ###
+    ### @return [File]
     def get_file(name)
       name = File.join(@temp_repo_dir, name)
       File.new name, "r"
@@ -51,7 +62,9 @@ module Git2JSS
 
     private
 
-    # clone to temp and return path to repo in temp dir
+    ### Clone to temp and return path to repo in temp dir.
+    ###
+    ### @return [String]
     def clone_to_temp_dir
       begin
         temp_repo = Git.clone("#{@remote_uri}", "#{@temp_repo_dir}")
@@ -62,20 +75,24 @@ module Git2JSS
       return temp_repo.dir.to_s
     end # clone_to_temp_dir
 
-    # retrieves the name of the remote (usually origin)
+    ### Retrieve the name of the remote (usually origin)
+    ###
+    ### @return [String]
     def get_remote_name
       remotes = @git.remotes
 
       if remotes.size > 1
         raise TooManyRemotesError, "Git2JSS only supports one remote."
-      elsif remotes.size < 1 or remotes[0] == nil
+      elsif remotes.size < 1 || remotes[0] == nil
         raise NoRemoteError, "No Git remote is configured."
       else
         remotes[0].name
       end # get_remote_name
     end
 
-    # retrieves the URI of the remote
+    ### Retrieves the URI of the remote
+    ###
+    ### @return [String]
     def get_remote_uri
       remotes = @git.remotes
       return remotes[0].url

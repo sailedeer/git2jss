@@ -6,6 +6,10 @@ require 'keychain'
 require 'git2jss/exceptions'
 
 module Git2JSS
+
+  ### Extends functionality of the JSS::Configuration class to
+  ### use the system keyring to store passwords.
+
   class KeyringJSSPrefs
 
     DEFAULT_PORT = 8443
@@ -20,12 +24,12 @@ module Git2JSS
 
     attr_reader :preference_file_path
 
-    # initialize a new Prefs object
+    ### Initialize!
     def initialize(pref_file=nil, use_keyring=false)
       @use_keyring = use_keyring
       @keyring = Keychain.default
       @preference_file_path = nil
-      if not pref_file.nil?
+      if !pref_file.nil?
         # reload from the file they passed, if it exists
         file_path = File.expand_path(pref_file)
         if File.exist?(file_path)
@@ -40,15 +44,21 @@ module Git2JSS
       @verify_cert = JSS::CONFIG.api_verify_cert
       @port = JSS::CONFIG.api_server_port
       @user = JSS::CONFIG.api_username
-      if not @fqdn or not @user
+      if !(@fqdn && @user)
         puts("WARNING: Critical preferences missing. Prompting for preferences.")
         prompt_for_preferences!
-        puts("Would you like to save the ")
+        save!(@preference_file_path)
       end # if
       @pw = load_password(use_keyring)
     end # initialize
 
-    # save JSS prefs to prefs file and keyring if specified
+    ### Save the the current preferences to teh system keyring and
+    ### configured preference file.
+    ###
+    ### @param preference_file[String]
+    ###
+    ### @return [void]
+
     def save!(preference_file = nil)
       JSS::CONFIG.api_server_name = @fqdn
       JSS::CONFIG.api_verify_cert = @verify_cert 
@@ -74,6 +84,10 @@ module Git2JSS
       puts "JSS Credentials have been updated."
     end # save!
 
+    ### Prompt the user for new preferences.
+    ###
+    ### @return [void]
+
     def prompt_for_preferences!
       print("Please enter the FQDN of the JSS server: ")
       @fqdn = gets.chomp("\n")
@@ -83,9 +97,13 @@ module Git2JSS
       @port = gets.chomp("\n")
       print("Should the API verify the SSL certificate of the server (y/N)? ")
       @verify_cert = (gets.chomp("\n")[0] == 'y')
-      return true
+      return
     end # prompt_for_preferences
 
+    ### Prompt the user for a new password. Doesn't echo
+    ### entered text to the terminal.
+    ###
+    ### @return [void]
     def prompt_for_password
       begin
         $stdin.reopen '/dev/tty' unless $stdin.tty?
@@ -94,7 +112,7 @@ module Git2JSS
         pass = $stdin.gets.chomp("\n")
         $stderr.print("Please verify the API user password: ")
         pass_verify = $stdin.gets.chomp("\n")
-        while not pass_verify == pass do
+        while !pass_verify == pass do
           $stderr.print("Please enter the API user password for #{@fqdn}: ")
           pass = $stdin.gets.chomp("\n")
           $stderr.print("Please verify the API user password: ")
@@ -105,14 +123,26 @@ module Git2JSS
       end # begin
     end # prompt_for_password
 
+    ### Prompt the user for a new password without echoing
+    ### input to the terminal. Updates password in place.
+    ###
+    ### @return [void]
+
     def prompt_for_password!
       pass = prompt_for_password
       @pw = pass
-      return true
+      return
     end # prompt_for_password
 
     private 
 
+    ### Load the password from the system keyring, or 
+    ### prompt the user for a password if use_keyring is false.
+    ### Prompts the user for a password if it doesn't exist in the keyring.
+    ###
+    ### @param use_keyring[Boolean]
+    ###
+    ### @return [String]
     def load_password(use_keyring)
       if use_keyring
         item = @keyring.internet_passwords.where(server: "#{@fqdn}", account: "#{@user}").first

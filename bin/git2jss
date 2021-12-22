@@ -1,4 +1,4 @@
 #!/usr/bin/env ruby
 
 require 'git2jss' # => this is the gem itself
-Git2JSS.run ARGV 
+Git2JSS.run(ARGV) 
