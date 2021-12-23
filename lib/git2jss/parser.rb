@@ -8,7 +8,8 @@ module Git2JSS
   ### convenient accessor methods.
   class Parser
     attr_reader :files, :all, :names, :source_dir, :branch, :tag,
-                :verbose, :dry, :info, :use_keyring, :preference_file
+                :verbose, :dry, :info, :use_keyring, :preference_file,
+                :quiet
   
     ### Initialize!
     ###
@@ -85,6 +86,7 @@ module Git2JSS
       info_option parser
       keyring_option parser
       preference_file_option parser
+      quiet_option parser
       verbose_option parser
       dry_run_option parser
   
@@ -156,7 +158,24 @@ module Git2JSS
       parser.on "-i", "--jss-info", "Print the current JSS configuration, "\
                                       "or enter a new configuration if no "\
                                       "configuration currently exists." do
-        JSS::CONFIG.print
+        # let's find out if a default preference file exists
+        if !(File.exist?(JSS::Configuration::USER_CONFS.first) ||
+              File.exist?(JSS::Configuration::GLOBAL_CONFS.first))
+          LOGGER.bare("No configuration found. Please enter one.")
+          # no default file, prompt for preferences.
+          print("Please enter the FQDN of the JSS server: ")
+          JSS::CONFIG.api_server_name = gets.chomp("\n")
+          print("Please enter the API user's username for #{@fqdn}: ")
+          JSS::CONFIG.api_username = gets.chomp("\n")
+          print("Please enter the port used for #{@fqdn}: ")
+          JSS::CONFIG.api_server_port = gets.chomp("\n")
+          print("Should the API verify the SSL certificate of the server (y/N)? ")
+          JSS::CONFIG.api_verify_cert = (gets.chomp("\n")[0] == 'y')
+          JSS::CONFIG.save(:user)
+        else
+          LOGGER.notify("Current JSS Settings ------------")
+          JSS::CONFIG.print
+        end # if
         exit(0)
       end # do block
     end # info_option
@@ -176,6 +195,12 @@ module Git2JSS
         @use_keyring = false
       end # do block
     end # keyring_option
+
+    def quiet_option(parser)
+      parser.on "-q", "--quiet", "Don't print any output during execution." do
+        @quiet = true
+      end # do block
+    end # quiet_option
       
     def verbose_option(parser)
       parser.on "-v", "--verbose", "Print verbose output during execution." do
