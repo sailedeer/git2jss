@@ -6,7 +6,7 @@
 * [Requirements](#requirements)
 
 ## Description
-git2jss is a command-line utility written in Ruby used to synchronize a git repository with a Jamf Software Server (JSS) script database. It requires Ruby 2.7 (or below) access to a JSS, permissions to create an API user account with appropriate access to the JSS, a git repository, and a computer running MacOS. This utility would not be possible without the following libraries: [ruby-jss](https://github.com/PixarAnimationStudios/ruby-jss), [ruby-git](https://github.com/ruby-git/ruby-git), and [ruby-keychain](https://github.com/fcheung/keychain).
+git2jss is a command-line utility written in Ruby used to synchronize a git repository with a Jamf Software Server (JSS) script database. This utility would not be possible without the following libraries: [ruby-jss](https://github.com/PixarAnimationStudios/ruby-jss), [ruby-git](https://github.com/ruby-git/ruby-git), and [ruby-keychain](https://github.com/fcheung/keychain).
 
 ## Installation
 Currently, the command line utility can only be installed from source pending better testing. At a later date, it will be available from ruby-gems.org. A sufficiently configured Ruby environment must already be set up (I recommend doing so with [rbenv](https://github.com/rbenv/rbenv)). One can build the gem with the following commands, after cloning the repository:
