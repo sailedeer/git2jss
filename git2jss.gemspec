@@ -18,17 +18,16 @@ Gem::Specification.new do |s|
                   EOD
   s.authors     = ["Eli Reed"]
   s.email       = ["erobreed@uw.edu"]
-  # s.homepage    = 'https://rubygems.org/gems/git2jss' or https://github.com/UW-LT/git2jss
+  s.homepage    = "https://github.com/sailedeer/git2jss"
   s.license     = 'MIT'
 
   s.files = Dir['lib/**/*.rb']
-  # s.files << '.yardopts'
-  s.files += Dir['test/**/*']
+  # s.files += Dir['test/**/*']
 
   s.executables << 'git2jss'
 
   # Dependencies
-  s.required_ruby_version = '>= 2.7.5'
+  s.required_ruby_version = '>= 2.7'
 
   s.add_runtime_dependency 'ruby-jss', '~>1.6.4'
   s.add_runtime_dependency 'ruby-keychain', '~> 0.3.2'
